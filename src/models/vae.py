@@ -16,13 +16,11 @@ class VAE(pl.LightningModule):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
 
         # model arguments
-        parser.add_argument('--embed_dim', type=int, default=20)
-        parser.add_argument('--enc_hidden_dim', type=int, default=50)
-        parser.add_argument('--latent_dim', type=int, default=25)
+        parser.add_argument('--embed_dim', type=int, default=50)
+        parser.add_argument('--enc_hidden_dim', type=int, default=100)
+        parser.add_argument('--latent_dim', type=int, default=50)
         parser.add_argument('--dec_hidden_dim', type=int, default=50)
         parser.add_argument('--dec_num_layers', type=int, default=2)
-
-        parser.add_argument('--beta', type=float, default=3.0)
 
         return parser
 
@@ -31,7 +29,7 @@ class VAE(pl.LightningModule):
                  latent_dim,
                  dec_hidden_dim, dec_num_layers,
                  vocab_size, pad_idx, sos_idx,
-                 lr, **kwargs):
+                 lr, beta, **kwargs):
         super().__init__()
         self.save_hyperparameters()
 

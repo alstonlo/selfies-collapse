@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7d1fbde5-7d4e-4982-8295-71332e070810" name="Default Changelist" comment="" />
+    <list default="true" id="7d1fbde5-7d4e-4982-8295-71332e070810" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/entry.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data/qm9_datamodule.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/data/qm9_datamodule.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/vae.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/vae.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test_collapse.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/experiments/test_collapse.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -14,6 +21,9 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="ProjectId" id="1mcwrbpiHeGFoG40qSpGWNTkugB" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -22,17 +32,22 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/datasets" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\alsto\Documents\GitHub\selfies-collapse" />
+      <recent name="C:\Users\alsto\Documents\GitHub\selfies-collapse\src\experiments" />
+    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\alsto\PycharmProjects\selfies-collapse\datasets" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.test_collapse">
+  <component name="RunManager" selected="Python.entry">
     <configuration name="a" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="selfies-collapse" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -75,6 +90,27 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="entry" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="selfies-collapse" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/entry.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="qm9_datamodule (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="selfies-collapse" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -96,27 +132,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="qm9_datamodule" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="selfies-collapse" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/selfies-collapse/data" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/selfies-collapse/data/qm9_datamodule.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="test_collapse" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="selfies-collapse" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -129,7 +144,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/test_collapse.py" />
+      <option name="SCRIPT_NAME" value="C:\Users\alsto\Documents\GitHub\selfies-collapse\src\experiments\test_collapse.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -140,11 +155,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.entry" />
         <item itemvalue="Python.test_collapse" />
         <item itemvalue="Python.a" />
         <item itemvalue="Python.qm9_datamodule (1)" />
         <item itemvalue="Python.datasets" />
-        <item itemvalue="Python.qm9_datamodule" />
       </list>
     </recent_temporary>
   </component>
@@ -182,33 +197,49 @@
       <screen x="1920" y="0" width="1920" height="1030" />
     </state>
     <state x="2660" y="276" key="FileChooserDialogImpl/1920.0.1920.1030/0.0.1536.824@1920.0.1920.1030" timestamp="1609807267519" />
-    <state width="1515" height="313" key="GridCell.Tab.0.bottom" timestamp="1609827418082">
-      <screen x="0" y="0" width="1536" height="824" />
+    <state width="1899" height="274" key="GridCell.Tab.0.bottom" timestamp="1609835955454">
+      <screen x="1920" y="0" width="1920" height="1030" />
     </state>
     <state width="1515" height="313" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1609827288654" />
     <state width="1515" height="313" key="GridCell.Tab.0.bottom/1920.0.1920.1030/0.0.1536.824@0.0.1536.824" timestamp="1609827418082" />
-    <state width="1899" height="282" key="GridCell.Tab.0.bottom/1920.0.1920.1030/0.0.1536.824@1920.0.1920.1030" timestamp="1609813028504" />
-    <state width="1515" height="313" key="GridCell.Tab.0.center" timestamp="1609827418082">
-      <screen x="0" y="0" width="1536" height="824" />
+    <state width="1899" height="274" key="GridCell.Tab.0.bottom/1920.0.1920.1030/0.0.1536.824@1920.0.1920.1030" timestamp="1609835955454" />
+    <state width="1899" height="274" key="GridCell.Tab.0.center" timestamp="1609835955454">
+      <screen x="1920" y="0" width="1920" height="1030" />
     </state>
     <state width="1515" height="313" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1609827288638" />
     <state width="1515" height="313" key="GridCell.Tab.0.center/1920.0.1920.1030/0.0.1536.824@0.0.1536.824" timestamp="1609827418082" />
-    <state width="1899" height="282" key="GridCell.Tab.0.center/1920.0.1920.1030/0.0.1536.824@1920.0.1920.1030" timestamp="1609813028504" />
-    <state width="1515" height="313" key="GridCell.Tab.0.left" timestamp="1609827418082">
-      <screen x="0" y="0" width="1536" height="824" />
+    <state width="1899" height="274" key="GridCell.Tab.0.center/1920.0.1920.1030/0.0.1536.824@1920.0.1920.1030" timestamp="1609835955454" />
+    <state width="1899" height="274" key="GridCell.Tab.0.left" timestamp="1609835955453">
+      <screen x="1920" y="0" width="1920" height="1030" />
     </state>
     <state width="1515" height="313" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1609827288638" />
     <state width="1515" height="313" key="GridCell.Tab.0.left/1920.0.1920.1030/0.0.1536.824@0.0.1536.824" timestamp="1609827418082" />
-    <state width="1899" height="282" key="GridCell.Tab.0.left/1920.0.1920.1030/0.0.1536.824@1920.0.1920.1030" timestamp="1609813028504" />
-    <state width="1515" height="313" key="GridCell.Tab.0.right" timestamp="1609827418082">
-      <screen x="0" y="0" width="1536" height="824" />
+    <state width="1899" height="274" key="GridCell.Tab.0.left/1920.0.1920.1030/0.0.1536.824@1920.0.1920.1030" timestamp="1609835955453" />
+    <state width="1899" height="274" key="GridCell.Tab.0.right" timestamp="1609835955454">
+      <screen x="1920" y="0" width="1920" height="1030" />
     </state>
     <state width="1515" height="313" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1609827288654" />
     <state width="1515" height="313" key="GridCell.Tab.0.right/1920.0.1920.1030/0.0.1536.824@0.0.1536.824" timestamp="1609827418082" />
-    <state width="1899" height="282" key="GridCell.Tab.0.right/1920.0.1920.1030/0.0.1536.824@1920.0.1920.1030" timestamp="1609813028504" />
-    <state x="2381" y="163" key="SettingsEditor" timestamp="1609808764375">
+    <state width="1899" height="274" key="GridCell.Tab.0.right/1920.0.1920.1030/0.0.1536.824@1920.0.1920.1030" timestamp="1609835955454" />
+    <state width="1899" height="348" key="GridCell.Tab.1.bottom" timestamp="1609834782144">
       <screen x="1920" y="0" width="1920" height="1030" />
     </state>
-    <state x="2381" y="163" key="SettingsEditor/1920.0.1920.1030/0.0.1536.824@1920.0.1920.1030" timestamp="1609808764375" />
+    <state width="1899" height="348" key="GridCell.Tab.1.bottom/1920.0.1920.1030/0.0.1536.824@1920.0.1920.1030" timestamp="1609834782144" />
+    <state width="1899" height="348" key="GridCell.Tab.1.center" timestamp="1609834782144">
+      <screen x="1920" y="0" width="1920" height="1030" />
+    </state>
+    <state width="1899" height="348" key="GridCell.Tab.1.center/1920.0.1920.1030/0.0.1536.824@1920.0.1920.1030" timestamp="1609834782144" />
+    <state width="1899" height="348" key="GridCell.Tab.1.left" timestamp="1609834782144">
+      <screen x="1920" y="0" width="1920" height="1030" />
+    </state>
+    <state width="1899" height="348" key="GridCell.Tab.1.left/1920.0.1920.1030/0.0.1536.824@1920.0.1920.1030" timestamp="1609834782144" />
+    <state width="1899" height="348" key="GridCell.Tab.1.right" timestamp="1609834782144">
+      <screen x="1920" y="0" width="1920" height="1030" />
+    </state>
+    <state width="1899" height="348" key="GridCell.Tab.1.right/1920.0.1920.1030/0.0.1536.824@1920.0.1920.1030" timestamp="1609834782144" />
+    <state x="2381" y="163" key="SettingsEditor" timestamp="1609827507634">
+      <screen x="1920" y="0" width="1920" height="1030" />
+    </state>
+    <state x="2381" y="163" key="SettingsEditor/1920.0.1920.1030/0.0.1536.824@1920.0.1920.1030" timestamp="1609827507634" />
   </component>
 </project>
