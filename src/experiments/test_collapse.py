@@ -42,12 +42,12 @@ def test_collapse_main():
     # ---------------------
     # main experiment
     # ---------------------
+    max_epochs = 60
     encodings = ['smiles', 'selfies']
-    betas = [1, 0.1, 0.01, 0.001, 0.0001]
+    betas = [0.1, 1, 3]
 
     for encoding, beta in itertools.product(encodings, betas):
 
-        model_name = f"{encoding}_beta={beta}"
         qm9 = qm9_dict[encoding]
 
         model = VAE(**vars(args),
@@ -56,14 +56,16 @@ def test_collapse_main():
                     sos_idx=qm9.dataset.get_sos_idx(),
                     pad_idx=qm9.dataset.get_pad_idx())
 
+        version = f"enc={encoding}_beta={beta}"
         logger = pl_loggers.TensorBoardLogger(
-            log_dir, name=model_name, default_hp_metric=False
+            log_dir, name='small_vae', version=version,
+            default_hp_metric=False
         )
 
         trainer = pl.Trainer.from_argparse_args(
             args,
             logger=logger,
-            max_epochs=1,
+            max_epochs=max_epochs,
             gradient_clip_val=args.grad_clip
         )
         trainer.fit(model, datamodule=qm9)
