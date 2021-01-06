@@ -31,4 +31,8 @@ batch size, and so forth. The main differences between the VAEs are as follows:
  * VAEs S, M, and L were trained up to 60 epochs. VAE XL was trained
    without a maximum number of epochs, but until early stopping triggered.  
 
- 
+---
+
+## Viewing Logs
+
+These logs can be viewed using TensorBoard. 
