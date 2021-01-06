@@ -35,4 +35,9 @@ batch size, and so forth. The main differences between the VAEs are as follows:
 
 ## Viewing Logs
 
-These logs can be viewed using TensorBoard. 
+These logs can be viewed using TensorBoard. Once TensorBoard is installed,
+and these log files are downloaded, run 
+
+```bash
+tensorboard --logdir <log_directory>
+```
