@@ -25,7 +25,7 @@ batch size, and so forth. The main differences between the VAEs are as follows:
 
  * Each log directory is of the form `enc={...}_beta={...}`. The `enc={...}`
    species whether the VAE was trained on the SMILES or SELIFES version of QM9.
-   The `beta={...}` gives the weight of the KL Divergence of the loss used
+   The `beta={...}` gives the weight of the KL divergence of the loss used
    to train the VAE (i.e. `loss = recon_loss + beta * KL_divergence`).
  
  * VAEs S, M, and L were trained up to 60 epochs. VAE XL was trained
