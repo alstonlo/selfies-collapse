@@ -3,7 +3,8 @@ import pathlib
 from argparse import ArgumentParser
 
 import pytorch_lightning as pl
-import pytorch_lightning.loggers as pl_loggers
+from pytorch_lightning.loggers.tensorboard import TensorBoardLogger
+from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
 from src.data.qm9_datamodule import QM9DataModule
 from src.models.vae import VAE
@@ -42,9 +43,8 @@ def test_collapse_main():
     # ---------------------
     # main experiment
     # ---------------------
-    max_epochs = 60
     encodings = ['smiles', 'selfies']
-    betas = [0.1, 1, 3]
+    betas = [1, 5, 10]
 
     for encoding, beta in itertools.product(encodings, betas):
 
@@ -57,15 +57,23 @@ def test_collapse_main():
                     pad_idx=qm9.dataset.get_pad_idx())
 
         version = f"enc={encoding}_beta={beta}"
-        logger = pl_loggers.TensorBoardLogger(
-            log_dir, name='small_vae', version=version,
+        logger = TensorBoardLogger(
+            log_dir, name='vae_dec_XL', version=version,
             default_hp_metric=False
+        )
+
+        early_stopping = EarlyStopping(
+            monitor='val_loss',
+            min_delta=0.00,
+            patience=10,
+            verbose=True,
+            mode='min'
         )
 
         trainer = pl.Trainer.from_argparse_args(
             args,
             logger=logger,
-            max_epochs=max_epochs,
+            callbacks=[early_stopping],
             gradient_clip_val=args.grad_clip
         )
         trainer.fit(model, datamodule=qm9)
