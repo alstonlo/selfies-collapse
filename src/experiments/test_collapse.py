@@ -29,7 +29,7 @@ def test_collapse_main():
     # ------------
     qm9_dict = {
         'smiles': QM9DataModule('smiles', args.batch_size, split_seed=12),
-        'selfies': QM9DataModule('smiles', args.batch_size, split_seed=12)
+        'selfies': QM9DataModule('selfies', args.batch_size, split_seed=12)
     }
     qm9_dict['smiles'].prepare_data()
     qm9_dict['selfies'].prepare_data()
