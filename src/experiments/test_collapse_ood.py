@@ -18,7 +18,9 @@ def main():
     parser.add_argument('--n_trials', type=int, default=1)
 
     parser.add_argument('--batch_size', type=int, default=256)
-    parser.add_argument('--lr', type=float, default=0.0001)
+    parser.add_argument('--lr', type=float, default=0.0005)
+    parser.add_argument('--beta', type=float, default=0.1)
+
     parser.add_argument('--seed', type=int, default=299)
 
     parser = VAE.add_model_specific_args(parser)
@@ -48,7 +50,7 @@ def main():
             model = VAE(**vars(args), vocab=qm9.vocab)
 
             logger = TensorBoardLogger(
-                log_dir, name=f"vae_lang={lang}", version=i,
+                log_dir, name=f"vae_{lang}", version=i,
                 default_hp_metric=False
             )
 

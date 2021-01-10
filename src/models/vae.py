@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from argparse import ArgumentParser
 
 import pytorch_lightning as pl
@@ -57,7 +55,9 @@ class VAE(pl.LightningModule):
                                   hidden_dim=dec_hidden_dim,
                                   num_layers=dec_num_layers,
                                   n_vocab=len(vocab),
-                                  eos_idx=vocab.eos_idx)
+                                  bos_idx=vocab.bos_idx,
+                                  eos_idx=vocab.eos_idx,
+                                  pad_idx=vocab.pad_idx)
 
         self.loss_f = nn.CrossEntropyLoss(ignore_index=vocab.pad_idx)
 
@@ -66,8 +66,9 @@ class VAE(pl.LightningModule):
         mu, log_var = self.encoder(x)
         z = self.reparameterize(mu, log_var)
         x_hat = self.decoder(z, x)
+        x = nn.utils.rnn.pad_sequence(x, False, self.vocab.pad_idx)
 
-        return x_hat, z, mu, log_var
+        return x, x_hat, z, mu, log_var
 
     @staticmethod
     def reparameterize(mu, log_var):
@@ -76,10 +77,10 @@ class VAE(pl.LightningModule):
         return mu + epsilon * std
 
     def training_step(self, batch, batch_idx):
-        x_hat, z, mu, log_var = self(batch)
+        x, x_hat, z, mu, log_var = self(batch)
 
         loss, (recons, kld) = \
-            self.compute_loss(x=batch, x_hat=x_hat, mu=mu, log_var=log_var)
+            self.compute_loss(x=x, x_hat=x_hat, mu=mu, log_var=log_var)
 
         self.log('train_loss', loss)
         self.log('train_recons', recons)
@@ -88,22 +89,22 @@ class VAE(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        x_hat, z, mu, log_var = self(batch)
+        x, x_hat, z, mu, log_var = self(batch)
 
         loss, (recons, kld) = \
-            self.compute_loss(x=batch, x_hat=x_hat, mu=mu, log_var=log_var)
+            self.compute_loss(x=x, x_hat=x_hat, mu=mu, log_var=log_var)
 
-        self.log('val_loss', loss)
+        self.log('val_loss', loss, prog_bar=True)
         self.log('val_recons', recons)
         self.log('val_kld', kld)
 
         return loss
 
     def test_step(self, batch, batch_idx):
-        x_hat, z, mu, log_var = self(batch)
+        x, x_hat, z, mu, log_var = self(batch)
 
         loss, (recons, kld) = \
-            self.compute_loss(x=batch, x_hat=x_hat, mu=mu, log_var=log_var)
+            self.compute_loss(x=x, x_hat=x_hat, mu=mu, log_var=log_var)
 
         self.log('test_loss', loss)
         self.log('test_recons', recons)
@@ -115,9 +116,12 @@ class VAE(pl.LightningModule):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
 
     def compute_loss(self, x, x_hat, mu, log_var):
+        x = x[1:]  # remove sos token
+        x_hat = x_hat[1:]
+
         # Reconstruction Loss
-        x_hat = x_hat.flatten(start_dim=0, end_dim=1)  # -> (B * L, E)
-        x = x.flatten(start_dim=0, end_dim=1)  # -> (B * L,)
+        x_hat = x_hat.view(-1, x_hat.size(2))  # -> (B * L, E)
+        x = x.view(-1)  # -> (B * L,)
         recons = self.loss_f(x_hat, x)
 
         # KL[q(z|x)||p(z)]

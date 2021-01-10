@@ -1,12 +1,9 @@
-from __future__ import annotations
-
 import pathlib
 from typing import Optional, Tuple
 
 import pandas as pd
 import pytorch_lightning as pl
 import torch
-from torch.nn.utils.rnn import pad_sequence
 from torch.utils import data
 
 from src.data.dataset import LineByLineDataset, Vocab
@@ -96,6 +93,6 @@ class QM9DataModule(pl.LightningDataModule):
                                batch_size=self.batch_size,
                                collate_fn=self._collate_fn)
 
-    def _collate_fn(self, sequences):
-        return pad_sequence(sequences, batch_first=False,
-                            padding_value=self.vocab.pad_idx)
+    @staticmethod
+    def _collate_fn(batch):
+        return list(batch)

@@ -22,8 +22,9 @@ class EncoderRNN(nn.Module):
         # H = hidden dim
         # Z = latent dim
 
-        # x -> (L, B)
-        x = self.embedding(x)  # -> (L, B, E)
+        x = [self.embedding(x_i) for x_i in x]
+        x = nn.utils.rnn.pack_sequence(x, enforce_sorted=False)
+
         _, h_final = self.gru(x)  # -> (1, B, H)
         h = h_final.squeeze()  # -> (B, H)
 
