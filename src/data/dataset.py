@@ -27,7 +27,7 @@ class Vocab:
     def __len__(self):
         return len(self.stoi)
 
-    def tokenize(self, s):
+    def label_encode(self, s):
         x = [self.stoi[c] for c in self.tokenize_fn(s)]
         x.insert(0, self.bos_idx)
         x.append(self.eos_idx)
@@ -38,7 +38,7 @@ class LineDataset(data.Dataset):
 
     def __init__(self, lines, vocab):
         self.vocab = vocab
-        self.dataset = list(map(self.vocab.tokenize, lines))
+        self.dataset = list(map(self.vocab.label_encode, lines))
         self.max_len = max(x.size(0) for x in self.dataset)
 
     def __len__(self):
