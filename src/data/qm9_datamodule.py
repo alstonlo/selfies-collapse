@@ -1,57 +1,84 @@
-import pathlib
+from __future__ import annotations
 
+import pathlib
+from typing import Optional, Tuple
+
+import pandas as pd
 import pytorch_lightning as pl
-import selfies as sf
 import torch
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils import data
 
-from src.data.dataset import SELFIESDataset, SMILESDataset
+from src.data.dataset import LineByLineDataset, Vocab
 
 QM9_PATH = pathlib.Path(__file__).parents[2] / 'datasets' / 'qm9' / 'qm9.csv'
 
 
 class QM9DataModule(pl.LightningDataModule):
+    language: str
+    batch_size: int
+    split_ratio: Tuple[int, int]
+    split_seed: Optional[int]
+
+    vocab: Optional[Vocab]
+    train: Optional[LineByLineDataset]
+    val: Optional[LineByLineDataset]
+    test: Optional[LineByLineDataset]
 
     def __init__(self,
-                 encoding, batch_size,
-                 split_ratio=(0.8, 0.1, 0.1), split_seed=None):
+                 language: str,
+                 batch_size: int,
+                 split_ratio: Tuple[int, int] = (0.9, 0.1),
+                 split_seed: Optional[int] = None):
         super().__init__()
-        self.encoding = encoding
-        assert encoding in ('smiles', 'selfies')
+        self.language = language
+        assert language in ('smiles', 'selfies')
         self.batch_size = batch_size
         self.split_ratio = split_ratio
         self.split_seed = split_seed
 
-        self.dataset = None
+        self.vocab = None
         self.train = None
         self.val = None
         self.test = None
 
     def prepare_data(self):
-        with open(QM9_PATH, 'r') as f:
-            lines = list(map(lambda s: s.rstrip('\n'),
-                             f.readlines()))
+        qm9_df = pd.read_csv(QM9_PATH, header=0)
 
-        if self.encoding == 'smiles':
-            self.dataset = SMILESDataset(lines)
-
+        lines = qm9_df[self.language].tolist()
+        if self.language == 'smiles':
+            self.vocab = Vocab.build_from_smiles(lines)
         else:
-            lines = list(map(sf.encoder, lines))
-            self.dataset = SELFIESDataset(lines)
+            self.vocab = Vocab.build_from_selfies(lines)
 
     def setup(self, stage=None):
-        train_len = int(len(self.dataset) * self.split_ratio[0])
-        val_len = int(len(self.dataset) * self.split_ratio[1])
-        test_len = len(self.dataset) - train_len - val_len
-        lengths = [train_len, val_len, test_len]
 
-        generator = None
-        if self.split_seed is not None:
-            generator = torch.Generator().manual_seed(self.split_seed)
+        qm9 = pd.read_csv(QM9_PATH, header=0)
 
-        self.train, self.val, self.test = \
-            data.random_split(self.dataset, lengths, generator)
+        if (stage == 'fit') or (stage is None):
+            qmonly9 = qm9[qm9['num_heavy_atoms'] == 9]
+            dataset = LineByLineDataset(
+                qmonly9[self.language].tolist(),
+                self.vocab
+            )
+
+            train_len = int(len(dataset) * self.split_ratio[0])
+            val_len = len(dataset) - train_len
+
+            generator = None if self.split_seed is None \
+                else torch.Generator().manual_seed(self.split_seed)
+            self.train, self.val = data.random_split(
+                dataset=dataset,
+                lengths=[train_len, val_len],
+                generator=generator
+            )
+
+        if (stage == 'test') or (stage is None):
+            qm7 = qm9[qm9['num_heavy_atoms'] <= 7]
+            self.test = LineByLineDataset(
+                qm7[self.language].tolist(),
+                self.vocab
+            )
 
     def train_dataloader(self):
         return data.DataLoader(self.train,
@@ -60,10 +87,15 @@ class QM9DataModule(pl.LightningDataModule):
                                collate_fn=self._collate_fn)
 
     def val_dataloader(self):
-        return data.DataLoader(self.train,
+        return data.DataLoader(self.val,
+                               batch_size=self.batch_size,
+                               collate_fn=self._collate_fn)
+
+    def test_dataloader(self):
+        return data.DataLoader(self.test,
                                batch_size=self.batch_size,
                                collate_fn=self._collate_fn)
 
     def _collate_fn(self, sequences):
         return pad_sequence(sequences, batch_first=False,
-                            padding_value=self.dataset.get_pad_idx())
+                            padding_value=self.vocab.pad_idx)

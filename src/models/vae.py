@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from argparse import ArgumentParser
 
 import pytorch_lightning as pl
@@ -5,6 +7,7 @@ import torch
 import torch.nn as nn
 from pytorch_lightning.core.decorators import auto_move_data
 
+from src.data.dataset import Vocab
 from src.models.decoder import DecoderRNN
 from src.models.encoder import EncoderRNN
 
@@ -16,26 +19,34 @@ class VAE(pl.LightningModule):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
 
         # model arguments
-        parser.add_argument('--embed_dim', type=int, default=50)
+        parser.add_argument('--embed_dim', type=int, default=100)
         parser.add_argument('--enc_hidden_dim', type=int, default=100)
         parser.add_argument('--latent_dim', type=int, default=50)
-        parser.add_argument('--dec_hidden_dim', type=int, default=50)
-        parser.add_argument('--dec_num_layers', type=int, default=2)
+        parser.add_argument('--dec_hidden_dim', type=int, default=100)
+        parser.add_argument('--dec_num_layers', type=int, default=1)
 
         return parser
 
-    def __init__(self, embed_dim,
-                 enc_hidden_dim,
-                 latent_dim,
-                 dec_hidden_dim, dec_num_layers,
-                 vocab_size, pad_idx, eos_idx,
-                 lr, beta, **kwargs):
+    def __init__(self,
+                 vocab: Vocab,
+                 embed_dim: int,
+                 enc_hidden_dim: int,
+                 latent_dim: int,
+                 dec_hidden_dim: int,
+                 dec_num_layers: int,
+                 lr: float,
+                 beta: float,
+                 **kwargs):
         super().__init__()
         self.save_hyperparameters()
 
-        self.embedding = nn.Embedding(num_embeddings=vocab_size,
+        self.vocab = vocab
+        self.lr = lr
+        self.beta = beta
+
+        self.embedding = nn.Embedding(num_embeddings=len(vocab),
                                       embedding_dim=embed_dim,
-                                      padding_idx=pad_idx)
+                                      padding_idx=vocab.pad_idx)
 
         self.encoder = EncoderRNN(embedding=self.embedding,
                                   hidden_dim=enc_hidden_dim,
@@ -45,10 +56,10 @@ class VAE(pl.LightningModule):
                                   latent_dim=latent_dim,
                                   hidden_dim=dec_hidden_dim,
                                   num_layers=dec_num_layers,
-                                  out_dim=vocab_size,
-                                  eos_idx=eos_idx)
+                                  n_vocab=len(vocab),
+                                  eos_idx=vocab.eos_idx)
 
-        self.loss_f = nn.CrossEntropyLoss(ignore_index=pad_idx)
+        self.loss_f = nn.CrossEntropyLoss(ignore_index=vocab.pad_idx)
 
     @auto_move_data
     def forward(self, x):
@@ -67,8 +78,8 @@ class VAE(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         x_hat, z, mu, log_var = self(batch)
 
-        loss, (recons, kld) = self.compute_loss(x=batch, x_hat=x_hat,
-                                                mu=mu, log_var=log_var)
+        loss, (recons, kld) = \
+            self.compute_loss(x=batch, x_hat=x_hat, mu=mu, log_var=log_var)
 
         self.log('train_loss', loss)
         self.log('train_recons', recons)
@@ -79,8 +90,8 @@ class VAE(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         x_hat, z, mu, log_var = self(batch)
 
-        loss, (recons, kld) = self.compute_loss(x=batch, x_hat=x_hat,
-                                                mu=mu, log_var=log_var)
+        loss, (recons, kld) = \
+            self.compute_loss(x=batch, x_hat=x_hat, mu=mu, log_var=log_var)
 
         self.log('val_loss', loss)
         self.log('val_recons', recons)
@@ -88,11 +99,22 @@ class VAE(pl.LightningModule):
 
         return loss
 
+    def test_step(self, batch, batch_idx):
+        x_hat, z, mu, log_var = self(batch)
+
+        loss, (recons, kld) = \
+            self.compute_loss(x=batch, x_hat=x_hat, mu=mu, log_var=log_var)
+
+        self.log('test_loss', loss)
+        self.log('test_recons', recons)
+        self.log('test_kld', kld)
+
+        return loss
+
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
 
     def compute_loss(self, x, x_hat, mu, log_var):
-
         # Reconstruction Loss
         x_hat = x_hat.flatten(start_dim=0, end_dim=1)  # -> (B * L, E)
         x = x.flatten(start_dim=0, end_dim=1)  # -> (B * L,)

@@ -20,7 +20,7 @@ def main():
     with open(QM9_DIR / 'raw_qm9.txt', 'r') as f:
         lines = list(map(lambda s: s.rstrip('\n'), f.readlines()))
 
-    columns = ['SMILES', 'SELFIES', 'num_heavy_atoms']
+    columns = ['smiles', 'selfies', 'num_heavy_atoms']
     qm9_rows = []
 
     for smiles in tqdm.tqdm(lines, desc="Reading SMILES"):

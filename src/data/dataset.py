@@ -1,3 +1,5 @@
+import pprint
+
 import selfies as sf
 import torch
 from torch.utils import data
@@ -5,9 +7,35 @@ from torch.utils import data
 
 class Vocab:
 
+    @classmethod
+    def build_from_smiles(cls, lines):
+        alphabet = set()
+        for s in lines:
+            alphabet.update(set(s))
+
+        return Vocab(
+            alphabet=alphabet,
+            bos_token='[BOS]',
+            eos_token='[EOS]',
+            pad_token='[PAD]',
+            tokenize_fn=list
+        )
+
+    @classmethod
+    def build_from_selfies(cls, lines):
+        alphabet = sf.get_alphabet_from_selfies(lines)
+
+        return Vocab(
+            alphabet=alphabet,
+            bos_token='[bos]',
+            eos_token='[eos]',
+            pad_token='[nop]',
+            tokenize_fn=(lambda s: list(sf.split_selfies(s)))
+        )
+
     def __init__(self, alphabet, bos_token, eos_token, pad_token,
                  tokenize_fn):
-        alphabet = list(alphabet)
+        alphabet = list(sorted(alphabet))
         alphabet.insert(0, pad_token)
         alphabet.insert(1, bos_token)
         alphabet.insert(2, eos_token)
@@ -27,6 +55,9 @@ class Vocab:
     def __len__(self):
         return len(self.stoi)
 
+    def __str__(self):
+        return pprint.pformat(self.itos)
+
     def label_encode(self, s):
         x = [self.stoi[c] for c in self.tokenize_fn(s)]
         x.insert(0, self.bos_idx)
@@ -34,7 +65,7 @@ class Vocab:
         return torch.tensor(x, dtype=torch.long)
 
 
-class LineDataset(data.Dataset):
+class LineByLineDataset(data.Dataset):
 
     def __init__(self, lines, vocab):
         self.vocab = vocab
@@ -46,39 +77,3 @@ class LineDataset(data.Dataset):
 
     def __getitem__(self, item):
         return self.dataset[item]
-
-
-class SMILESDataset(LineDataset):
-
-    def __init__(self, lines):
-        alphabet = set()
-        for s in lines:
-            alphabet.update(set(s))
-
-        vocab = Vocab(
-            alphabet=alphabet,
-            bos_token='[BOS]',
-            eos_token='[EOS]',
-            pad_token='[PAD]',
-            tokenize_fn=list
-        )
-        super().__init__(lines, vocab)
-
-
-class SELFIESDataset(LineDataset):
-
-    def __init__(self, lines):
-        alphabet = sf.get_alphabet_from_selfies(lines)
-
-        vocab = Vocab(
-            alphabet=alphabet,
-            bos_token='[bos]',
-            eos_token='[eos]',
-            pad_token='[nop]',
-            tokenize_fn=self._split_line
-        )
-        super().__init__(lines, vocab)
-
-    @staticmethod
-    def _split_line(s):
-        return list(sf.split_selfies(s))

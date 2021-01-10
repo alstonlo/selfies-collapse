@@ -5,7 +5,7 @@ import torch.nn as nn
 class DecoderRNN(nn.Module):
 
     def __init__(self, embedding, latent_dim,
-                 hidden_dim, num_layers, out_dim,
+                 hidden_dim, num_layers, n_vocab,
                  eos_idx):
         super(DecoderRNN, self).__init__()
         self.eos_idx = eos_idx
@@ -16,7 +16,7 @@ class DecoderRNN(nn.Module):
                           hidden_size=hidden_dim,
                           num_layers=num_layers,
                           batch_first=False)
-        self.fc_out = nn.Linear(hidden_dim, out_dim)
+        self.fc_out = nn.Linear(hidden_dim, n_vocab)
 
     def forward(self, z, x):
         # B = batch size
