@@ -60,7 +60,7 @@ class QM9DataModule(pl.LightningDataModule):
                                collate_fn=self._collate_fn)
 
     def val_dataloader(self):
-        return data.DataLoader(self.train,
+        return data.DataLoader(self.val,
                                batch_size=self.batch_size,
                                collate_fn=self._collate_fn)
 
