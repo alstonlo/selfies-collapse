@@ -6,9 +6,9 @@ class DecoderRNN(nn.Module):
 
     def __init__(self, embedding, latent_dim,
                  hidden_dim, num_layers, out_dim,
-                 sos_idx):
+                 eos_idx):
         super(DecoderRNN, self).__init__()
-        self.sos_idx = sos_idx
+        self.eos_idx = eos_idx
 
         self.embedding = embedding
         self.fc_hidden = nn.Linear(latent_dim, hidden_dim)
@@ -30,7 +30,7 @@ class DecoderRNN(nn.Module):
         seq_len, batch_size = x.size()
 
         x_hat = []
-        x_i = self.sos_idx \
+        x_i = self.eos_idx \
               * torch.ones((1, batch_size), dtype=torch.long, device=x.device)
         h_i = torch.stack([self.fc_hidden(z)] * self.gru.num_layers, dim=0)
         # x_i -> (1, B);  h_i -> (num layers, B, H)

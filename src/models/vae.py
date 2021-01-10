@@ -28,7 +28,7 @@ class VAE(pl.LightningModule):
                  enc_hidden_dim,
                  latent_dim,
                  dec_hidden_dim, dec_num_layers,
-                 vocab_size, pad_idx, sos_idx,
+                 vocab_size, pad_idx, eos_idx,
                  lr, beta, **kwargs):
         super().__init__()
         self.save_hyperparameters()
@@ -46,7 +46,7 @@ class VAE(pl.LightningModule):
                                   hidden_dim=dec_hidden_dim,
                                   num_layers=dec_num_layers,
                                   out_dim=vocab_size,
-                                  sos_idx=sos_idx)
+                                  eos_idx=eos_idx)
 
         self.loss_f = nn.CrossEntropyLoss(ignore_index=pad_idx)
 

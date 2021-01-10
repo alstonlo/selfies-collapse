@@ -8,7 +8,7 @@ from torch.utils import data
 
 from src.data.dataset import SELFIESDataset, SMILESDataset
 
-QM9_PATH = pathlib.Path(__file__).parents[2] / 'datasets' / 'qm9.txt'
+QM9_PATH = pathlib.Path(__file__).parents[2] / 'datasets' / 'qm9' / 'qm9.csv'
 
 
 class QM9DataModule(pl.LightningDataModule):

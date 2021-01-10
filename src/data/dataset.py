@@ -3,25 +3,42 @@ import torch
 from torch.utils import data
 
 
-class LineDataset(data.Dataset):
+class Vocab:
 
-    def __init__(self, lines, split_line,
-                 alphabet, sos_token, pad_token):
-        self.sos_token = sos_token
-        self.pad_token = pad_token
-
-        alphabet = list(sorted(alphabet))
+    def __init__(self, alphabet, bos_token, eos_token, pad_token,
+                 tokenize_fn):
+        alphabet = list(alphabet)
         alphabet.insert(0, pad_token)
-        alphabet.insert(1, sos_token)
+        alphabet.insert(1, bos_token)
+        alphabet.insert(2, eos_token)
 
         self.stoi = {c: i for i, c in enumerate(alphabet)}
         self.itos = {i: c for c, i in self.stoi.items()}
+        self.bos_token = bos_token
+        self.eos_token = eos_token
+        self.pad_token = pad_token
 
-        self.dataset = []
-        for s in lines:
-            self.dataset.append(
-                label_encoded(split_line(s), self.stoi)
-            )
+        self.bos_idx = self.stoi[bos_token]
+        self.eos_idx = self.stoi[eos_token]
+        self.pad_idx = self.stoi[pad_token]
+
+        self.tokenize_fn = tokenize_fn
+
+    def __len__(self):
+        return len(self.stoi)
+
+    def tokenize(self, s):
+        x = [self.stoi[c] for c in self.tokenize_fn(s)]
+        x.insert(0, self.bos_idx)
+        x.append(self.eos_idx)
+        return torch.tensor(x, dtype=torch.long)
+
+
+class LineDataset(data.Dataset):
+
+    def __init__(self, lines, vocab):
+        self.vocab = vocab
+        self.dataset = list(map(self.vocab.tokenize, lines))
         self.max_len = max(x.size(0) for x in self.dataset)
 
     def __len__(self):
@@ -30,12 +47,6 @@ class LineDataset(data.Dataset):
     def __getitem__(self, item):
         return self.dataset[item]
 
-    def get_sos_idx(self):
-        return self.stoi[self.sos_token]
-
-    def get_pad_idx(self):
-        return self.stoi[self.pad_token]
-
 
 class SMILESDataset(LineDataset):
 
@@ -43,26 +54,31 @@ class SMILESDataset(LineDataset):
         alphabet = set()
         for s in lines:
             alphabet.update(set(s))
-        super().__init__(
-            lines, list,
-            alphabet, sos_token='[SOS]', pad_token='[PAD]'
+
+        vocab = Vocab(
+            alphabet=alphabet,
+            bos_token='[BOS]',
+            eos_token='[EOS]',
+            pad_token='[PAD]',
+            tokenize_fn=list
         )
+        super().__init__(lines, vocab)
 
 
 class SELFIESDataset(LineDataset):
 
     def __init__(self, lines):
         alphabet = sf.get_alphabet_from_selfies(lines)
-        super().__init__(
-            lines, self._split_line,
-            alphabet, sos_token='[sos]', pad_token='[nop]'
+
+        vocab = Vocab(
+            alphabet=alphabet,
+            bos_token='[bos]',
+            eos_token='[eos]',
+            pad_token='[nop]',
+            tokenize_fn=self._split_line
         )
+        super().__init__(lines, vocab)
 
     @staticmethod
     def _split_line(s):
         return list(sf.split_selfies(s))
-
-
-def label_encoded(symbols, stoi):
-    x = [stoi[c] for c in symbols]
-    return torch.tensor(x, dtype=torch.long)

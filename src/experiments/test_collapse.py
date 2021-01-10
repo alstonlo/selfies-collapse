@@ -53,7 +53,7 @@ def test_collapse_main():
         model = VAE(**vars(args),
                     beta=beta,
                     vocab_size=len(qm9.dataset.stoi),
-                    sos_idx=qm9.dataset.get_sos_idx(),
+                    eos_idx=qm9.dataset.get_eos_idx(),
                     pad_idx=qm9.dataset.get_pad_idx())
 
         version = f"enc={encoding}_beta={beta}"
