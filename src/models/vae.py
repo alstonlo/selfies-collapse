@@ -8,6 +8,7 @@ from pytorch_lightning.core.decorators import auto_move_data
 from src.data.dataset import Vocab
 from src.models.decoder import DecoderRNN
 from src.models.encoder import EncoderRNN
+from src.models.metrics import Accuracy, EditDistance
 
 
 class VAE(pl.LightningModule):
@@ -61,6 +62,9 @@ class VAE(pl.LightningModule):
 
         self.loss_f = nn.CrossEntropyLoss(ignore_index=vocab.pad_idx)
 
+        self.test_acc = Accuracy(ignore_index=vocab.pad_idx)
+        self.test_edit_dist = EditDistance(eos_idx=vocab.eos_idx)
+
     @auto_move_data
     def forward(self, x):
         mu, log_var = self.encoder(x)
@@ -106,9 +110,17 @@ class VAE(pl.LightningModule):
         loss, (recons, kld) = \
             self.compute_loss(x=x, x_hat=x_hat, mu=mu, log_var=log_var)
 
+        x = x[1:].transpose(0, 1)  # remove sos token, and set batch_first=True
+        x_hat = x_hat[1:].transpose(0, 1).argmax(dim=-1)
+
+        self.test_acc(preds=x_hat, targets=x)
+        self.test_edit_dist(preds=x_hat, targets=x)
+
         self.log('test_loss', loss)
         self.log('test_recons', recons)
         self.log('test_kld', kld)
+        self.log('test_acc', self.test_acc)
+        self.log('test_edit_dist', self.test_edit_dist)
 
         return loss
 

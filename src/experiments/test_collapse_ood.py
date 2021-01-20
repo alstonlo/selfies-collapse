@@ -16,10 +16,11 @@ def main():
     parser = ArgumentParser()
 
     parser.add_argument('--n_trials', type=int, default=1)
+    parser.add_argument('--n_test_mols', type=int, default=10000)
 
     parser.add_argument('--batch_size', type=int, default=256)
     parser.add_argument('--lr', type=float, default=0.0005)
-    parser.add_argument('--beta', type=float, default=0.1)
+    parser.add_argument('--beta', type=float, default=0.05)
 
     parser.add_argument('--seed', type=int, default=299)
 
@@ -66,7 +67,8 @@ def main():
                 args,
                 logger=logger,
                 callbacks=[early_stopping],
-                deterministic=True
+                deterministic=True,
+                limit_test_batches=int(args.n_test_mols / args.batch_size)
             )
 
             trainer.fit(model, datamodule=qm9)

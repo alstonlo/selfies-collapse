@@ -53,9 +53,9 @@ class QM9DataModule(pl.LightningDataModule):
         qm9 = pd.read_csv(QM9_PATH, header=0)
 
         if (stage == 'fit') or (stage is None):
-            qmonly9 = qm9[qm9['num_heavy_atoms'] == 9]
+            train_val_df = qm9[qm9['num_heavy_atoms'] <= 7]
             dataset = LineByLineDataset(
-                qmonly9[self.language].tolist(),
+                train_val_df[self.language].tolist(),
                 self.vocab
             )
 
@@ -71,9 +71,9 @@ class QM9DataModule(pl.LightningDataModule):
             )
 
         if (stage == 'test') or (stage is None):
-            qm7 = qm9[qm9['num_heavy_atoms'] <= 7]
+            test_df = qm9[qm9['num_heavy_atoms'] == 9]
             self.test = LineByLineDataset(
-                qm7[self.language].tolist(),
+                test_df[self.language].tolist(),
                 self.vocab
             )
 
