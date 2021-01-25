@@ -29,7 +29,7 @@ class QM9DataModule(pl.LightningDataModule):
                  split_seed: Optional[int] = None):
         super().__init__()
         self.language = language
-        assert language in ('smiles', 'selfies')
+        assert language in ('smiles', 'deep_smiles', 'selfies')
         self.batch_size = batch_size
         self.split_ratio = split_ratio
         self.split_seed = split_seed
@@ -43,10 +43,7 @@ class QM9DataModule(pl.LightningDataModule):
         qm9_df = pd.read_csv(QM9_PATH, header=0)
 
         lines = qm9_df[self.language].tolist()
-        if self.language == 'smiles':
-            self.vocab = Vocab.build_from_smiles(lines)
-        else:
-            self.vocab = Vocab.build_from_selfies(lines)
+        self.vocab = Vocab.build_from_language(lines, language=self.language)
 
     def setup(self, stage=None):
 

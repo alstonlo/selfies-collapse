@@ -13,29 +13,16 @@ from src.models.metrics import Accuracy, EditDistance
 
 class VAE(pl.LightningModule):
 
-    @staticmethod
-    def add_model_specific_args(parent_parser):
-        parser = ArgumentParser(parents=[parent_parser], add_help=False)
-
-        # model arguments
-        parser.add_argument('--embed_dim', type=int, default=100)
-        parser.add_argument('--enc_hidden_dim', type=int, default=100)
-        parser.add_argument('--latent_dim', type=int, default=50)
-        parser.add_argument('--dec_hidden_dim', type=int, default=100)
-        parser.add_argument('--dec_num_layers', type=int, default=1)
-
-        return parser
-
     def __init__(self,
                  vocab: Vocab,
                  embed_dim: int,
                  enc_hidden_dim: int,
+                 enc_num_layers: int,
                  latent_dim: int,
                  dec_hidden_dim: int,
                  dec_num_layers: int,
                  lr: float,
-                 beta: float,
-                 **kwargs):
+                 beta: float):
         super().__init__()
         self.save_hyperparameters()
 
@@ -49,6 +36,7 @@ class VAE(pl.LightningModule):
 
         self.encoder = EncoderRNN(embedding=self.embedding,
                                   hidden_dim=enc_hidden_dim,
+                                  num_layers=enc_num_layers,
                                   latent_dim=latent_dim)
 
         self.decoder = DecoderRNN(embedding=self.embedding,

@@ -8,30 +8,35 @@ from torch.utils import data
 class Vocab:
 
     @classmethod
-    def build_from_smiles(cls, lines):
-        alphabet = set()
-        for s in lines:
-            alphabet.update(set(s))
+    def build_from_language(cls, lines, language):
+        assert language in {'smiles', 'deep_smiles', 'selfies'}
 
-        return Vocab(
-            alphabet=alphabet,
-            bos_token='[BOS]',
-            eos_token='[EOS]',
-            pad_token='[PAD]',
-            tokenize_fn=list
-        )
+        if language in ('smiles', 'deep_smiles'):
+            alphabet = set()
+            for s in lines:
+                alphabet.update(set(s))
 
-    @classmethod
-    def build_from_selfies(cls, lines):
-        alphabet = sf.get_alphabet_from_selfies(lines)
+            return Vocab(
+                alphabet=alphabet,
+                bos_token='[BOS]',
+                eos_token='[EOS]',
+                pad_token='[PAD]',
+                tokenize_fn=list
+            )
 
-        return Vocab(
-            alphabet=alphabet,
-            bos_token='[bos]',
-            eos_token='[eos]',
-            pad_token='[nop]',
-            tokenize_fn=(lambda s: list(sf.split_selfies(s)))
-        )
+        elif language == 'selfies':
+            alphabet = sf.get_alphabet_from_selfies(lines)
+
+            return Vocab(
+                alphabet=alphabet,
+                bos_token='[bos]',
+                eos_token='[eos]',
+                pad_token='[nop]',
+                tokenize_fn=(lambda x: list(sf.split_selfies(x)))
+            )
+
+        else:
+            raise ValueError()
 
     def __init__(self, alphabet, bos_token, eos_token, pad_token,
                  tokenize_fn):
