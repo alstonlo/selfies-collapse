@@ -1,17 +1,15 @@
 import pathlib
 import random
+from argparse import ArgumentParser
 
 import optuna
 import pytorch_lightning as pl
+import torch
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.loggers.tensorboard import TensorBoardLogger
 
 from src.data.qm9_datamodule import QM9DataModule
 from src.models.vae import VAE
-
-SEED = 299
-N_TRIALS = 1
-N_TEST_MOLS = 10000
 
 # ------------
 # file paths
@@ -24,12 +22,12 @@ def run_trial(trial: optuna.trial.Trial):
     # =================
     # model params
     # =================
-    embed_dim = trial.suggest_int("embed_dim", low=50, high=100)
+    embed_dim = trial.suggest_int("embed_dim", low=25, high=200)
     enc_num_layers = trial.suggest_int("enc_num_layers", low=1, high=3)
-    enc_hidden_dim = trial.suggest_int("enc_hidden_dim", low=25, high=100)
+    enc_hidden_dim = trial.suggest_int("enc_hidden_dim", low=25, high=200)
     latent_dim = trial.suggest_int("latent_dim", low=25, high=150)
     dec_num_layers = trial.suggest_int("dec_num_layers", low=1, high=3)
-    dec_hidden_dim = trial.suggest_int("dec_hidden_dim", low=25, high=100)
+    dec_hidden_dim = trial.suggest_int("dec_hidden_dim", low=25, high=200)
 
     # ==================
     # training params
@@ -43,13 +41,13 @@ def run_trial(trial: optuna.trial.Trial):
     # ---------------------
     # main experiment
     # ---------------------
-    for lang in ['smiles', 'deep_smiles', 'selfies']:
+    for language in ['smiles', 'deep_smiles', 'selfies']:
 
         # ------------
         # data
         # ------------
         qm9 = QM9DataModule(
-            lang,
+            language,
             batch_size=batch_size,
             split_seed=split_seed,
         )
@@ -68,7 +66,7 @@ def run_trial(trial: optuna.trial.Trial):
         )
 
         logger = TensorBoardLogger(
-            LOG_DIR, name=f"vae_{lang}",
+            LOG_DIR, name=f"vae_{language}",
             default_hp_metric=False
         )
 
@@ -84,8 +82,9 @@ def run_trial(trial: optuna.trial.Trial):
             logger=logger,
             callbacks=[early_stopping],
             deterministic=True,
-            limit_test_batches=int(N_TEST_MOLS / batch_size),
-            fast_dev_run=3,  # TODO: comment out
+            progress_bar_refresh_rate=0,
+            weights_summary=None,
+            gpus=int(torch.cuda.is_available())
         )
 
         trainer.fit(model, datamodule=qm9)
@@ -95,10 +94,23 @@ def run_trial(trial: optuna.trial.Trial):
 
 
 def main():
-    pl.seed_everything(SEED)
+    parser = ArgumentParser()
+    parser.add_argument('--seed', type=int, default=299)
+    parser.add_argument('--n_trials', type=int, default=20)
+    args = parser.parse_args()
+
+    pl.seed_everything(seed=args.seed)
 
     study = optuna.create_study(
         study_name="ood_recons",
-        sampler=optuna.samplers.RandomSampler(seed=SEED)
+        storage="sqlite:///ood_recons.db",
+        sampler=optuna.samplers.RandomSampler(seed=args.seed),
+        load_if_exists=True
     )
-    study.optimize(run_trial, n_trials=N_TRIALS)
+
+    study.optimize(
+        func=run_trial,
+        n_trials=args.n_trials,
+        timeout=14400,
+        show_progress_bar=True
+    )

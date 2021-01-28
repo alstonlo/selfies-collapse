@@ -59,8 +59,7 @@ class QM9DataModule(pl.LightningDataModule):
             train_len = int(len(dataset) * self.split_ratio[0])
             val_len = len(dataset) - train_len
 
-            generator = None if self.split_seed is None \
-                else torch.Generator().manual_seed(self.split_seed)
+            generator = self._split_generator()
             self.train, self.val = data.random_split(
                 dataset=dataset,
                 lengths=[train_len, val_len],
@@ -69,9 +68,16 @@ class QM9DataModule(pl.LightningDataModule):
 
         if (stage == 'test') or (stage is None):
             test_df = qm9[qm9['num_heavy_atoms'] == 9]
-            self.test = LineByLineDataset(
+            dataset = LineByLineDataset(
                 test_df[self.language].tolist(),
                 self.vocab
+            )
+
+            generator = self._split_generator()
+            self.test, _ = data.random_split(
+                dataset=dataset,
+                lengths=[10000, len(dataset) - 10000],
+                generator=generator
             )
 
     def train_dataloader(self):
@@ -93,3 +99,9 @@ class QM9DataModule(pl.LightningDataModule):
     @staticmethod
     def _collate_fn(batch):
         return list(batch)
+
+    def _split_generator(self):
+        if self.split_seed is None:
+            return None
+        else:
+            return torch.Generator().manual_seed(self.split_seed)
