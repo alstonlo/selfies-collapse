@@ -1,6 +1,9 @@
+import editdistance
 import torch
 from pytorch_lightning.metrics import Metric
-import editdistance
+
+from rdkit.Chem import AllChem
+from rdkit.DataStructs.cDataStructs import TanimotoSimilarity
 
 
 class Accuracy(Metric):
@@ -12,7 +15,6 @@ class Accuracy(Metric):
         self.add_state('correct', default=torch.tensor(0))
         self.add_state('total', default=torch.tensor(0))
 
-    # noinspection PyTypeChecker
     def update(self, preds, targets):
         assert preds.size() == targets.size()
         assert len(preds.size()) == 2
@@ -52,10 +54,6 @@ class EditDistance(Metric):
             self.cul_edit_dist += dist
             self.total += 1
 
-            # print(f"s_p ({len(s_p)}): {s_p} "
-            #       f"\ts_t ({len(s_t)}): {s_t} "
-            #       f"\tdist: {dist}")
-
     def compute(self):
         return self.cul_edit_dist.float() / self.total
 
@@ -69,3 +67,43 @@ class EditDistance(Metric):
             else:
                 s += chr(i + 48)
         return s
+
+
+class ChemicalValidity(Metric):
+
+    def __init__(self):
+        super().__init__()
+
+        self.add_state('num_valid', default=torch.tensor(0))
+        self.add_state('total', default=torch.tensor(0))
+
+    def update(self, mols):
+        self.num_valid += (len(mols) - mols.count(None))
+        self.total += len(mols)
+
+    def compute(self):
+        return self.num_valid.float() / self.total
+
+
+class ChemicalSimilarity(Metric):
+
+    def __init__(self):
+        super().__init__()
+
+        self.add_state('cul_sim', default=torch.tensor(0.0))
+        self.add_state('total', default=torch.tensor(0))
+
+    def update(self, mols_a, mols_b):
+        assert len(mols_a) == len(mols_b)
+
+        for a, b in zip(mols_a, mols_b):
+            if (a is None) or (b is None):
+                continue
+
+            fp_a = AllChem.GetMorganFingerprint(a, 2)
+            fp_b = AllChem.GetMorganFingerprint(b, 2)
+            self.cul_sim += TanimotoSimilarity(fp_a, fp_b)
+            self.total += 1
+
+    def compute(self):
+        return self.cul_sim.float() / self.total

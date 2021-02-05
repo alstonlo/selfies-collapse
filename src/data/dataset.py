@@ -1,44 +1,17 @@
 import pprint
+from abc import ABC, abstractmethod
 
+import deepsmiles
 import selfies as sf
 import torch
 from torch.utils import data
 
 
-class Vocab:
+class Vocab(ABC):
 
-    @classmethod
-    def build_from_language(cls, lines, language):
-        assert language in {'smiles', 'deep_smiles', 'selfies'}
-
-        if language in ('smiles', 'deep_smiles'):
-            alphabet = set()
-            for s in lines:
-                alphabet.update(set(s))
-
-            return Vocab(
-                alphabet=alphabet,
-                bos_token='[BOS]',
-                eos_token='[EOS]',
-                pad_token='[PAD]',
-                tokenize_fn=list
-            )
-
-        elif language == 'selfies':
-            alphabet = sf.get_alphabet_from_selfies(lines)
-
-            return Vocab(
-                alphabet=alphabet,
-                bos_token='[bos]',
-                eos_token='[eos]',
-                pad_token='[nop]',
-                tokenize_fn=(lambda x: list(sf.split_selfies(x)))
-            )
-
-        else:
-            raise ValueError()
-
-    def __init__(self, alphabet, bos_token, eos_token, pad_token,
+    def __init__(self,
+                 alphabet,
+                 bos_token, eos_token, pad_token,
                  tokenize_fn):
         alphabet = list(sorted(alphabet))
         alphabet.insert(0, pad_token)
@@ -68,6 +41,89 @@ class Vocab:
         x.insert(0, self.bos_idx)
         x.append(self.eos_idx)
         return torch.tensor(x, dtype=torch.long)
+
+    def label_decode(self, x: torch.Tensor):
+        symbols = []
+        for i in x:
+            if i == self.eos_idx:
+                break
+            symbols.append(self.itos[i.item()])
+
+        s = ''.join(symbols)
+        s = s.replace(self.bos_token, "")
+        s = s.replace(self.pad_token, "")
+        return s
+
+    def label_decode_batch(self, x: torch.Tensor):
+        assert len(x.size()) == 2
+        return [self.label_decode(x_i) for x_i in x]
+
+    @abstractmethod
+    def translate_to_smiles(self, s):
+        raise NotImplementedError()
+
+
+class SMILESVocab(Vocab):
+
+    def __init__(self, lines):
+        alphabet = set()
+        for s in lines:
+            alphabet.update(set(s))
+
+        super().__init__(
+            alphabet=alphabet,
+            bos_token='[BOS]',
+            eos_token='[EOS]',
+            pad_token='[PAD]',
+            tokenize_fn=list
+        )
+
+    def translate_to_smiles(self, s):
+        return s
+
+
+class DeepSMILESVocab(Vocab):
+
+    def __init__(self, lines):
+        alphabet = set()
+        for s in lines:
+            alphabet.update(set(s))
+
+        super().__init__(
+            alphabet=alphabet,
+            bos_token='[BOS]',
+            eos_token='[EOS]',
+            pad_token='[PAD]',
+            tokenize_fn=list
+        )
+
+        self.converter = deepsmiles.Converter(rings=True, branches=True)
+
+    def translate_to_smiles(self, s):
+        try:
+            return self.converter.decode(s)
+        except deepsmiles.DecodeError:
+            return None
+        except Exception:
+            print(s)
+            return None
+
+
+class SELFIESVocab(Vocab):
+
+    def __init__(self, lines):
+        alphabet = sf.get_alphabet_from_selfies(lines)
+
+        super().__init__(
+            alphabet=alphabet,
+            bos_token='[bos]',
+            eos_token='[eos]',
+            pad_token='[nop]',
+            tokenize_fn=(lambda x: list(sf.split_selfies(x)))
+        )
+
+    def translate_to_smiles(self, s):
+        return sf.decoder(s)
 
 
 class LineByLineDataset(data.Dataset):

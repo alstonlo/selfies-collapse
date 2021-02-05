@@ -4,6 +4,7 @@ from argparse import ArgumentParser
 
 import optuna
 import pytorch_lightning as pl
+import selfies as sf
 import torch
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.loggers.tensorboard import TensorBoardLogger
@@ -84,7 +85,9 @@ def run_trial(trial: optuna.trial.Trial):
             deterministic=True,
             progress_bar_refresh_rate=0,
             weights_summary=None,
-            gpus=int(torch.cuda.is_available())
+            gpus=int(torch.cuda.is_available()),
+            max_epochs=10,
+            fast_dev_run=True
         )
 
         trainer.fit(model, datamodule=qm9)
@@ -100,6 +103,11 @@ def main():
     args = parser.parse_args()
 
     pl.seed_everything(seed=args.seed)
+
+    # configure selfies
+    constraints = sf.get_semantic_constraints()
+    constraints['N'] = 6
+    sf.set_semantic_constraints(constraints)
 
     study = optuna.create_study(
         study_name="ood_recons",

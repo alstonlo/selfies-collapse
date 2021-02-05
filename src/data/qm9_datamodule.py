@@ -6,7 +6,13 @@ import pytorch_lightning as pl
 import torch
 from torch.utils import data
 
-from src.data.dataset import LineByLineDataset, Vocab
+from src.data.dataset import (
+    DeepSMILESVocab,
+    LineByLineDataset,
+    SELFIESVocab,
+    SMILESVocab,
+    Vocab
+)
 
 QM9_PATH = pathlib.Path(__file__).parents[2] / 'datasets' / 'qm9' / 'qm9.csv'
 
@@ -43,7 +49,18 @@ class QM9DataModule(pl.LightningDataModule):
         qm9_df = pd.read_csv(QM9_PATH, header=0)
 
         lines = qm9_df[self.language].tolist()
-        self.vocab = Vocab.build_from_language(lines, language=self.language)
+
+        if self.language == 'smiles':
+            self.vocab = SMILESVocab(lines)
+
+        elif self.language == 'deep_smiles':
+            self.vocab = DeepSMILESVocab(lines)
+
+        elif self.language == 'selfies':
+            self.vocab = SELFIESVocab(lines)
+
+        else:
+            raise ValueError()
 
     def setup(self, stage=None):
 
@@ -96,12 +113,12 @@ class QM9DataModule(pl.LightningDataModule):
                                batch_size=self.batch_size,
                                collate_fn=self._collate_fn)
 
-    @staticmethod
-    def _collate_fn(batch):
-        return list(batch)
-
     def _split_generator(self):
         if self.split_seed is None:
             return None
         else:
             return torch.Generator().manual_seed(self.split_seed)
+
+    @staticmethod
+    def _collate_fn(batch):
+        return list(batch)
